@@ -4,10 +4,16 @@
 #### REPRESENTATION DES DONNEES
 ### Initialisation des grilles et autres variables de jeu
 
-def initialiser_configuration_milieu():
-    return [["X", "O", "X"],
-            [" ", "X", "O"],
-            [" ", " ", " "]]
+def initialiser_configuration_debut():
+    return [["X", "X", "X","X","X","X","X","X","X"],
+            ["X", "X", "X","X","X","X","X","X","X"],
+            ["X", "X", "X","X","X","X","X","X","X"],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            ["O", "O", "O","O","O","O","O","O","O"],
+            ["O", "O", "O","O","O","O","O","O","O"],
+            ["O", "O", "O","O","O","O","O","O","O"]]
 
 
 #### Representation graphique
@@ -17,7 +23,7 @@ def afficher_indice_colonne(grille):
     
     print("  ",end=" ") #Ce print permet de s'aligner avec les lettres dans la colonne
     for j in range(len(grille[0])):
-        print(" ",j+1," ",end="")
+        print(" ",j+1," ",end=" ")
     print()
 
 #Fonction auxiliaire qui permet d'afficher les lignes
@@ -31,10 +37,10 @@ def afficher_ligne(grille,i):
 
 #Fonction auxiliaire qui permet d'afficher les séparateurs
 def afficher_separateur(grille):
-    print(" ",end="")
+    print("  ", end="")
     for j in range(len(grille[0])):
-        print("--" * len(grille[1]),end="")
-    print()
+        print("------", end="")
+    print()  
 
 
 #Fonction qui permet d'afficher la grille complète
@@ -104,7 +110,7 @@ def test_est_au_bon_format():
 
 def main():
     print("Configuration de début :")
-    afficher_grille(initialiser_configuration_milieu())
+    afficher_grille(initialiser_configuration_debut())
 
 
 if __name__ == "__main__":
