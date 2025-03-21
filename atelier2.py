@@ -198,11 +198,11 @@ def main():
     test_est_dans_grille(initialiser_configuration_fin())
     test_est_au_bon_format()
     
-    #Code a decommenter pour tester les déplacements dans le jeu
-    '''
+    #Déplacement dans la grille(Les règles du jeu ne sont pas appliqué comme décrit dans l'atelier)
+    
     print("Bienvenue dans le jeu !")
 
-    grille = initialiser_configuration_debut()  # Vous pouvez cette partie pour choisir la grille que vous voulez tester
+    grille = initialiser_configuration_debut()  # Vous pouvez modifier cette partie pour choisir la grille que vous voulez tester
     tour = randint(1,2)  # 1 pour Joueur 1 (X), 2 pour Joueur 2 (O)
 
     for i in range(4): #On fait seulement 4 tours pour avoir un aperçu des mouvements
@@ -216,7 +216,7 @@ def main():
             print("C'est au joueur 2 de jouer")
             pion = "O"
         
-        l,c = saisir_coordonees_depart(grille) #l et c représente la ligne et la colonne
+        l,c = saisir_coordonees_depart(grille) # l et c représente la ligne et la colonne
         
         #On vérifie que l'on choisit le bon pion
         if grille[l][c] != pion:
@@ -231,8 +231,8 @@ def main():
 
         
         tour = 3-tour
-'
-        '''
+
+        
 
 
 
