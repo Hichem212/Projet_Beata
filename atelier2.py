@@ -38,7 +38,7 @@ def initialiser_configuration_fin():
             [" ", "O", "O"," "," "," ","O","O","O"]]
 
 
-#### Representation graphique
+#### Représentation graphique
 
 #Fonction auxiliaire qui permet d'afficher l'indice de la colonne
 def afficher_indice_colonne(grille):
@@ -91,6 +91,9 @@ def afficher_grille(grille):
             afficher_separateur(grille) #Affichage des séparations entre les lignes
     nombre_de_pion(grille)
 
+### Fonction de vérification
+### SAISIE
+
 #Fonction qui permet de savoir si un pion est dans la grille
 def est_dans_grille(ligne, colonne, grille):
     return 0 <= ligne < len(grille) and 0 <= colonne < len(grille[0])
@@ -109,8 +112,8 @@ def est_au_bon_format(message):
 
     return True
 
-
-def saisir_coordonnees_sortie(grille):
+#Fonction qui permet de choisir la destination ou l'on veut placer le pion(On ne tient pas encore en compte les règles du jeu comme indiqué sur le sujet)
+def saisir_coordonnees_arrivee(grille):
 
     while True:
 
@@ -122,13 +125,15 @@ def saisir_coordonnees_sortie(grille):
     
         ligne = ord(entree[0])-65 #Pour avoir la valeur de la ligne en lettre
         colonne = int(entree[1])-1 #Conversion en entier et ajuster pour l'index 0 
-
-        if est_dans_grille(ligne, colonne, grille) and grille[ligne][colonne] == " ":
+        
+        #Cette condition permet de vérifier qu'on est bien dans la grille et que l'endroit ou l'on veut placer notre pion n'est pas un endroit deja prit
+        if est_dans_grille(ligne, colonne, grille) and grille[ligne][colonne] == " ": 
             return ligne, colonne
         else:
             print("La case est en dehors de la grille ou elle est déja occupé")
-    
-def saisir_coordonees_entree(grille):
+
+#Fonction qui permet de choisir le pion que l'on souhaite déplacer
+def saisir_coordonees_depart(grille):
     while True:
 
         depart = input("Entrez la coordonée du pion que vous voulez déplacé : ").upper()
@@ -140,16 +145,23 @@ def saisir_coordonees_entree(grille):
         ligne = ord(depart[0])-65 #Pour avoir la valeur de la ligne en lettre
         colonne = int(depart[1])-1 #Conversion en entier et ajuster pour l'index 0 
 
-        if grille[ligne][colonne] == 'X' or grille[ligne][colonne] == 'O':
+        if grille[ligne][colonne] == 'X' or grille[ligne][colonne] == 'O': #Cette condition permet de savoir si l'on choisit bien un pion
             return ligne,colonne
         else:
             print("Cette case est vide")
 
 ### Jeu de test
+
 def test_est_dans_grille(grille):
     assert est_dans_grille(0,0,grille) == True
     assert est_dans_grille(0,1,grille) == True
     assert est_dans_grille(9,99,grille) == False
+    assert est_dans_grille(1,55,grille) == False
+    assert est_dans_grille(2,2,grille) == True
+    assert est_dans_grille(4,5,grille) == True
+    assert est_dans_grille(0,0,grille) == True
+    assert est_dans_grille(-2,-1,grille) == False
+
 
 def test_est_au_bon_format():
     assert est_au_bon_format("A2") == True
@@ -160,13 +172,17 @@ def test_est_au_bon_format():
     assert est_au_bon_format("11") == False 
     assert est_au_bon_format("1a") == False
     assert est_au_bon_format("a1") == False
+    assert est_au_bon_format("B-1") == False
+    assert est_au_bon_format("B5") == True
+    assert est_au_bon_format("F6") == True
 
 
-
+### Code principal  
 
 def main():
 
-    '''
+    
+    #Execution affichage sur les 3 grilles ainsi que test 
     print("Configuration de début :")
     afficher_grille(initialiser_configuration_debut())
     test_est_dans_grille(initialiser_configuration_debut())
@@ -174,40 +190,49 @@ def main():
     print("\n")
     print("Configuration de milieu :")
     afficher_grille(initialiser_configuration_milieu())
+    test_est_dans_grille(initialiser_configuration_milieu())
+    test_est_au_bon_format()
     print("\n")
     print("Configuration de fin :")
     afficher_grille(initialiser_configuration_fin())
-'''
-
+    test_est_dans_grille(initialiser_configuration_fin())
+    test_est_au_bon_format()
+    
+    #Code a decommenter pour tester les déplacements dans le jeu
+    '''
     print("Bienvenue dans le jeu !")
 
-    grille = initialiser_configuration_debut()  # Initialiser la grille de début
+    grille = initialiser_configuration_debut()  # Vous pouvez cette partie pour choisir la grille que vous voulez tester
     tour = randint(1,2)  # 1 pour Joueur 1 (X), 2 pour Joueur 2 (O)
 
-    while True:
+    for i in range(4): #On fait seulement 4 tours pour avoir un aperçu des mouvements
         afficher_grille(grille)
 
         if tour == 1:
             print("C'est au joueur 1 de jouer")
-            joueur = " Joueur 1:X"
+            pion = "X"
+           
         else:
             print("C'est au joueur 2 de jouer")
-            joueur = "Joueur 2 :O"
+            pion = "O"
         
-        l,c = saisir_coordonees_entree(grille)
-        ligne,colonne = saisir_coordonnees(grille)
-
-        if tour == 1:
-            grille[l][c] = " "
-            grille[ligne][colonne] = "X"
-        else:
-            grille[l][c] = " "
-            grille[ligne][colonne] = "O"
+        l,c = saisir_coordonees_depart(grille) #l et c représente la ligne et la colonne
+        
+        #On vérifie que l'on choisit le bon pion
+        if grille[l][c] != pion:
+            print("Vous ne pouvez pas déplacer les pions de l'adversaire")
+            continue
+        
+        ligne,colonne = saisir_coordonnees_arrivee(grille)
+        
+        #Déplacement du pion
+        grille[l][c] = " "
+        grille[ligne][colonne] = pion
 
         
         tour = 3-tour
-
-        
+'
+        '''
 
 
 
