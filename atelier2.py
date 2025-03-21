@@ -15,6 +15,28 @@ def initialiser_configuration_debut():
             ["O", "O", "O","O","O","O","O","O","O"],
             ["O", "O", "O","O","O","O","O","O","O"]]
 
+def initialiser_configuration_milieu():
+    return [["X", "X", "X","X","X","X","X","X","X"],
+            ["X", " ", "X"," ","X","X","X"," ","X"],
+            [" ", " ", "X","O","O","X","X"," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            ["O", " ", "X"," "," "," ","O","O","O"],
+            ["O", "X", "O","O","O"," ","O","O","O"],
+            ["O", "O", "O","O","O","O","O","O","O"]]
+
+def initialiser_configuration_fin():
+     return [["X", "X","X","X"," "," ","O"," "," "],
+            [" ", " ", "O"," "," "," "," "," "," "],
+            [" ", " ", "O","X"," "," "," ","O"," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", " ", " "," "," "," ","X"," "," "],
+            [" ", " ", " "," "," "," "," "," "," "],
+            [" ", "O", "O"," "," "," ","O","O","O"]]
+
 
 #### Representation graphique
 
@@ -42,6 +64,21 @@ def afficher_separateur(grille):
         print("------", end="")
     print()  
 
+#Fonction auxiliaire qui permet de connaitre le nombre de pion dans la grille de chaque joueur
+def nombre_de_pion(grille):
+
+    nbr_pion1,nbr_pion2 = 0,0
+
+    for i in range(len(grille)):
+        for j in range(len(grille)):
+            if grille[i][j] == "X":
+                nbr_pion1+=1
+
+            if grille[i][j] == "O":
+                nbr_pion2+=1
+    
+    print("Joueur 1 : ",nbr_pion1,"pion" "\t\t\t" "joueur 2 : ",nbr_pion2,"pion")
+    return nbr_pion1,nbr_pion2
 
 #Fonction qui permet d'afficher la grille complète
 def afficher_grille(grille):
@@ -52,7 +89,7 @@ def afficher_grille(grille):
         afficher_ligne(grille,i) #Affichage des lignes
         if i < len(grille) -1:
             afficher_separateur(grille) #Affichage des séparations entre les lignes
-
+    nombre_de_pion(grille)
 
 #Fonction qui permet de savoir si un pion est dans la grille
 def est_dans_grille(ligne, colonne, grille):
@@ -90,22 +127,6 @@ def saisir_coordonnees(grille):
             return ligne, colonne
     
 
-def nombre_de_pion(grille):
-
-    nbr_pion1,nbr_pion2 = 0,0
-
-    for i in range(len(grille)):
-        for j in range(len(grille)):
-            if grille[i][j] == "X":
-                nbr_pion1+=1
-
-            if grille[i][j] == "O":
-                nbr_pion2+=1
-    
-    print("Joueur 1 : ",nbr_pion1,"pion" "\t\t\t" "jouer 2 : ",nbr_pion2,"pion")
-    return nbr_pion1,nbr_pion2
-
-
 
 
 ### Jeu de test
@@ -133,7 +154,12 @@ def main():
     afficher_grille(initialiser_configuration_debut())
     test_est_dans_grille(initialiser_configuration_debut())
     test_est_au_bon_format()
-    nombre_de_pion(initialiser_configuration_debut())
+    print("\n")
+    print("Configuration de milieu :")
+    afficher_grille(initialiser_configuration_milieu())
+    print("\n")
+    print("Configuration de fin :")
+    afficher_grille(initialiser_configuration_fin())
 
 if __name__ == "__main__":
     main()
