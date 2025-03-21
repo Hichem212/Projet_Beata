@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from random import *
 
 #### REPRESENTATION DES DONNEES
 ### Initialisation des grilles et autres variables de jeu
@@ -53,7 +53,7 @@ def afficher_ligne(grille,i):
     print(chr(65+i) + ' |',end="") #Affiche de l'indice de la ligne 
     for j in range(len(grille[i])):
         print(" ",grille[i][j] ," ",end="")
-        if j< len(grille[i])-1:
+        if j < len(grille[i])-1:
             print("|",end="")
     print()
 
@@ -110,7 +110,7 @@ def est_au_bon_format(message):
     return True
 
 
-def saisir_coordonnees(grille):
+def saisir_coordonnees_sortie(grille):
 
     while True:
 
@@ -121,13 +121,29 @@ def saisir_coordonnees(grille):
             continue
     
         ligne = ord(entree[0])-65 #Pour avoir la valeur de la ligne en lettre
-        colonne = entree[1]
+        colonne = int(entree[1])-1 #Conversion en entier et ajuster pour l'index 0 
 
         if est_dans_grille(ligne, colonne, grille) and grille[ligne][colonne] == " ":
             return ligne, colonne
+        else:
+            print("La case est en dehors de la grille ou elle est déja occupé")
     
+def saisir_coordonees_entree(grille):
+    while True:
 
+        depart = input("Entrez la coordonée du pion que vous voulez déplacé : ").upper()
 
+        if not est_au_bon_format(depart):
+            print("Le format que vous avez rentré est invalide veuillez réesayer")
+            continue
+        
+        ligne = ord(depart[0])-65 #Pour avoir la valeur de la ligne en lettre
+        colonne = int(depart[1])-1 #Conversion en entier et ajuster pour l'index 0 
+
+        if grille[ligne][colonne] == 'X' or grille[ligne][colonne] == 'O':
+            return ligne,colonne
+        else:
+            print("Cette case est vide")
 
 ### Jeu de test
 def test_est_dans_grille(grille):
@@ -148,8 +164,9 @@ def test_est_au_bon_format():
 
 
 
-
 def main():
+
+    '''
     print("Configuration de début :")
     afficher_grille(initialiser_configuration_debut())
     test_est_dans_grille(initialiser_configuration_debut())
@@ -160,6 +177,39 @@ def main():
     print("\n")
     print("Configuration de fin :")
     afficher_grille(initialiser_configuration_fin())
+'''
+
+    print("Bienvenue dans le jeu !")
+
+    grille = initialiser_configuration_debut()  # Initialiser la grille de début
+    tour = randint(1,2)  # 1 pour Joueur 1 (X), 2 pour Joueur 2 (O)
+
+    while True:
+        afficher_grille(grille)
+
+        if tour == 1:
+            print("C'est au joueur 1 de jouer")
+            joueur = " Joueur 1:X"
+        else:
+            print("C'est au joueur 2 de jouer")
+            joueur = "Joueur 2 :O"
+        
+        l,c = saisir_coordonees_entree(grille)
+        ligne,colonne = saisir_coordonnees(grille)
+
+        if tour == 1:
+            grille[l][c] = " "
+            grille[ligne][colonne] = "X"
+        else:
+            grille[l][c] = " "
+            grille[ligne][colonne] = "O"
+
+        
+        tour = 3-tour
+
+        
+
+
 
 if __name__ == "__main__":
     main()
