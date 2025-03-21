@@ -90,6 +90,24 @@ def saisir_coordonnees(grille):
             return ligne, colonne
     
 
+def nombre_de_pion(grille):
+
+    nbr_pion1,nbr_pion2 = 0,0
+
+    for i in range(len(grille)):
+        for j in range(len(grille)):
+            if grille[i][j] == "X":
+                nbr_pion1+=1
+
+            if grille[i][j] == "O":
+                nbr_pion2+=1
+    
+    print("Joueur 1 : ",nbr_pion1,"pion" "\t\t\t" "jouer 2 : ",nbr_pion2,"pion")
+    return nbr_pion1,nbr_pion2
+
+
+
+
 ### Jeu de test
 def test_est_dans_grille(grille):
     assert est_dans_grille(0,0,grille) == True
@@ -115,6 +133,7 @@ def main():
     afficher_grille(initialiser_configuration_debut())
     test_est_dans_grille(initialiser_configuration_debut())
     test_est_au_bon_format()
+    nombre_de_pion(initialiser_configuration_debut())
 
 if __name__ == "__main__":
     main()
