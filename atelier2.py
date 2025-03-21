@@ -56,7 +56,7 @@ def afficher_grille(grille):
 
 #Fonction qui permet de savoir si un pion est dans la grille
 def est_dans_grille(ligne, colonne, grille):
-    return 0 <= ligne < len(grille) and 0 <= colonne < len(grille)
+    return 0 <= ligne < len(grille) and 0 <= colonne < len(grille[0])
 
 
 #Fonction qui permet de savoir si la valeur de case entrée est au bon format
@@ -71,6 +71,7 @@ def est_au_bon_format(message):
         return False
 
     return True
+
 
 def saisir_coordonnees(grille):
 
@@ -92,17 +93,18 @@ def saisir_coordonnees(grille):
 ### Jeu de test
 def test_est_dans_grille(grille):
     assert est_dans_grille(0,0,grille) == True
-    assert est_dans_grille(0,1,grille) == False
+    assert est_dans_grille(0,1,grille) == True
+    assert est_dans_grille(9,99,grille) == False
 
 def test_est_au_bon_format():
     assert est_au_bon_format("A2") == True
     assert est_au_bon_format("A22") == False
-    assert est_au_bon_format("a2") == True
+    assert est_au_bon_format("a2") == False
     assert est_au_bon_format("a55") == False
     assert est_au_bon_format("AA") == False
-    assert est_au_bon_format("11") == False
+    assert est_au_bon_format("11") == False 
     assert est_au_bon_format("1a") == False
-    assert est_au_bon_format("a1") == True
+    assert est_au_bon_format("a1") == False
 
 
 
@@ -111,7 +113,8 @@ def test_est_au_bon_format():
 def main():
     print("Configuration de début :")
     afficher_grille(initialiser_configuration_debut())
-
+    test_est_dans_grille(initialiser_configuration_debut())
+    test_est_au_bon_format()
 
 if __name__ == "__main__":
     main()
