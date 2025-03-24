@@ -150,6 +150,7 @@ def saisir_coordonees_depart(grille):
         else:
             print("Cette case est vide")
 
+
 ### Jeu de test
 
 def test_est_dans_grille(grille):
@@ -199,12 +200,12 @@ def main():
     test_est_au_bon_format()
     
     #Déplacement dans la grille(Les règles du jeu ne sont pas appliqué comme décrit dans l'atelier)
-    
+    print("\n");
     print("Bienvenue dans le jeu !")
 
     grille = initialiser_configuration_debut()  # Vous pouvez modifier cette partie pour choisir la grille que vous voulez tester
     tour = randint(1,2)  # 1 pour Joueur 1 (X), 2 pour Joueur 2 (O)
-
+    print("Le joueur 1 joue avec les pions X et le joueur 2 joue avec les pions O")
     for i in range(4): #On fait seulement 4 tours pour avoir un aperçu des mouvements
         afficher_grille(grille)
 
