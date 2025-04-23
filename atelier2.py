@@ -112,7 +112,7 @@ def est_au_bon_format(message):
 
     return True
 
-#Fonction qui permet de choisir la destination ou l'on veut placer le pion(On ne tient pas encore en compte les règles du jeu comme indiqué sur le sujet)
+#Fonction qui permet de choisir la destination ou l'on veut placer le pion
 def saisir_coordonnees_arrivee(grille):
 
     while True:
@@ -150,8 +150,179 @@ def saisir_coordonees_depart(grille):
         else:
             print("Cette case est vide")
 
+#Fonction qui permet de verifier si une case est vide
+def est_case_vide(grille, l, c):
+    return est_dans_grille(l, c, grille) and grille[l][c] == " "
+
+
+#Fonction qui permet de vérifié si c'est la case d'un adversaire
+def est_case_adversaire(grille, l, c, pion):
+    return est_dans_grille(l, c, grille) and grille[l][c] != pion and grille[l][c] != " "
+
+
+def direction_verticale(l1, c1, l2, c2): #l1,l2,c1,c2 représente successivement ligne 1 , ligne 2,colonne 1 et colonne 2
+    if c1 == c2 and l1 != l2:
+        return (l2 - l1) // (l2 - l1), 0  # Résultat sera +1 ou -1
+    return None
+
+def direction_horizontale(l1, c1, l2, c2):
+    if l1 == l2 and c1 != c2:
+        return 0, (c2 - c1) // (c2 - c1)  # Résultat sera +1 ou -1
+    return None
+
+def direction_diagonale(l1,c1,l2,c2):
+    dl = l2 - l1 # Représente la diagonale de la ligne
+    dc = c2 - c1 # Représente la diagonale de la colonne
+
+    # Vérifie que les deux mouvements (vertical et horizontal) sont non nuls et de même "longueur"
+    if dl != 0 and dc != 0 and dl * dl == dc * dc:
+        return dl // dl, dc // dc  # renvoie (+1, -1, etc.)
+    return None
+
+def obtenir_direction(l1, c1, l2, c2):
+    #Retourne la direction (dl, dc) si elle est valide (verticale, horizontale ou diagonale), sinon None
+    direction = direction_verticale(l1, c1, l2, c2)
+    if direction is not None:
+        return direction
+
+    direction = direction_horizontale(l1, c1, l2, c2)
+    if direction is not None:
+        return direction
+
+    return direction_diagonale(l1, c1, l2, c2)
+
+
+def chemin_vide(grille, l1, c1, l2, c2):
+    direction = obtenir_direction(l1, c1, l2, c2)
+
+    dl, dc = direction
+    l, c = l1 + dl, c1 + dc
+
+    while (l, c) != (l2, c2):
+        if not est_case_vide(grille, l, c):
+            return False
+        l += dl
+        c += dc
+
+    return True
+
+def deplacement_retournement(grille, l1, c1, l2, c2, pion):
+    # Déterminer la direction
+    direction = obtenir_direction(l1, c1, l2, c2)
+
+    dl, dc = direction
+    l_saut = l2 - dl
+    c_saut = c2 - dc
+
+    # Vérifie que la case à sauter est bien un pion adverse
+    if not est_case_adversaire(grille, l_saut, c_saut, pion):
+        return False
+
+    # Vérifie que toutes les cases entre départ et le pion sauté sont vides
+    if not chemin_vide(grille, l1, c1, l_saut, c_saut):
+        return False
+
+    # Vérifie que la case d'arrivée est bien vide
+    if not est_case_vide(grille, l2, c2):
+        return False
+
+    # Appliquer le retournement
+    grille[l1][c1] = " "
+    grille[l_saut][c_saut] = pion  # retourne le pion sauté
+    grille[l2][c2] = pion
+    return True
+
+def deplacement_elimination(grille, l1, c1, l2, c2, pion):
+    if not est_case_adversaire(grille, l2, c2, pion):
+        return False
+    if abs(l2 - l1) < 2 and abs(c2 - c1) < 2:
+        return False  # pas de voisins immédiats
+    if not chemin_vide(grille, l1, c1, l2, c2):
+        return False
+
+    # Exécution du déplacement
+    grille[l2][c2] = pion
+    grille[l1][c1] = " "
+    return True
+
+
+def tour_de_jeu(grille, pion):
+    print("Tour du joueur 1(X) " if pion == 'X' else "Tour du joueur 2(O) ")
+
+    while True:
+        type_deplacement = input("Entrez le type de déplacement ('e' pour élimination, 'r' pour retournement) : ").lower()
+        if type_deplacement in ['e', 'r']:
+            break
+        print(" Type invalide. Entrez 'e' ou 'r'.")
+
+    # Première tentative de déplacement
+    deplacement_reussi = False
+    while not deplacement_reussi:
+        l1, c1 = saisir_coordonees_depart(grille)
+        l2, c2 = saisir_coordonnees_arrivee(grille)
+
+        if grille[l1][c1] != pion:
+            print(" Ce n'est pas votre pion.")
+            continue
+
+        if type_deplacement == 'e':
+            deplacement_reussi = deplacement_elimination(grille, l1, c1, l2, c2, pion)
+        else:
+            deplacement_reussi = deplacement_retournement(grille, l1, c1, l2, c2, pion)
+
+        if not deplacement_reussi:
+            print(" Déplacement invalide selon les règles.")
+
+    # Si c'est un retournement, proposer l'enchaînement
+    if type_deplacement == 'r':
+        encore = input("Voulez-vous continuer les sauts ? (o/n) : ").lower()
+        while encore == 'o':
+            afficher_grille(grille)
+            deplacement_reussi = False
+            while not deplacement_reussi:
+                l1, c1 = saisir_coordonees_depart(grille)
+                l2, c2 = saisir_coordonnees_arrivee(grille)
+                if grille[l1][c1] != pion:
+                    print("⛔ Ce n'est pas votre pion.")
+                    continue
+                deplacement_reussi = deplacement_retournement(grille, l1, c1, l2, c2, pion)
+                if not deplacement_reussi:
+                    print("⛔ Saut invalide.")
+            encore = input("Continuer les sauts ? (o/n) : ").lower()
+
 
 ### Jeu de test
+
+def test_est_case_vide():
+    grille = initialiser_configuration_debut()
+
+    assert est_case_vide(grille, 3, 3) == True
+    assert est_case_vide(grille, 0, 0) == False
+    assert est_case_vide(grille, 9, 9) == False  # hors grille
+
+def test_est_case_adversaire():
+
+    grille = initialiser_configuration_debut()
+    assert est_case_adversaire(grille, 0, 0, "O") == True   # case X, adversaire de O
+    assert est_case_adversaire(grille, 0, 0, "X") == False  # case X, même camp
+    assert est_case_adversaire(grille, 3, 3, "O") == False  # case vide
+    assert est_case_adversaire(grille, 9, 9, "X") == False  # hors grille
+
+def test_direction_verticale():
+    assert direction_verticale(2, 2, 5, 2) == (1, 0)
+    assert direction_verticale(5, 4, 2, 4) == (-1, 0)
+    assert direction_verticale(2, 3, 2, 5) == None
+
+def test_direction_horizontale():
+    assert direction_horizontale(4, 1, 4, 6) == (0, 1)
+    assert direction_horizontale(7, 5, 7, 2) == (0, -1)
+    assert direction_horizontale(3, 3, 6, 3) == None
+
+def test_direction_diagonale():
+    assert direction_diagonale(2, 2, 5, 5) == (1, 1)
+    assert direction_diagonale(6, 6, 3, 3) == (-1, -1)
+    assert direction_diagonale(1, 4, 4, 1) == (1, -1)
+    assert direction_diagonale(0, 0, 0, 5) == None
 
 def test_est_dans_grille(grille):
     assert est_dans_grille(0,0,grille) == True
@@ -177,12 +348,61 @@ def test_est_au_bon_format():
     assert est_au_bon_format("B5") == True
     assert est_au_bon_format("F6") == True
 
+def test_chemin_vide():
+
+    grille = initialiser_configuration_milieu()
+
+    # Cas de chemins vides
+    assert chemin_vide(grille, 3, 0, 3, 4) == True     # Ligne vide
+    assert chemin_vide(grille, 5, 3, 2, 3) == False    # Bloqué par un pion en (3,3)
+    assert chemin_vide(grille, 2, 3, 5, 6) == False    # diagonale, mais bloqué
+    assert chemin_vide(grille, 5, 0, 2, 3) == False    # diagonale bloquée
+    assert chemin_vide(grille, 3, 3, 3, 6) == True     # Ligne horizontale vide
+
+    # Cas de chemins non valides (hors direction alignée)
+    assert chemin_vide(grille, 1, 1, 2, 4) == False
+
+
+def test_deplacement_elimination():
+
+    # Copie pour test (on évite de modifier la config de base)
+    grille = initialiser_configuration_milieu()
+
+    # Cas valide : un pion X en (0,0) peut éliminer un pion O éloigné (on crée manuellement le cas ici)
+    grille[0][0] = "X"
+    grille[0][4] = "O"
+    grille[0][1] = " "
+    grille[0][2] = " "
+    grille[0][3] = " "
+
+    assert deplacement_elimination(grille, 0, 0, 0, 4, "X") == True
+    assert grille[0][4] == "X"
+    assert grille[0][0] == " "
+
+    # Cas invalide : pas de case vide entre départ et adversaire (ils sont voisins)
+    grille = initialiser_configuration_milieu()
+    grille[2][3] = "X"
+    grille[2][4] = "O"
+    assert deplacement_elimination(grille, 2, 3, 2, 4, "X") == False
+
+    # Cas invalide : il y a un obstacle dans le chemin
+    grille = initialiser_configuration_milieu()
+    grille[0][0] = "X"
+    grille[0][1] = "O"
+    grille[0][4] = "O"
+    assert deplacement_elimination(grille, 0, 0, 0, 4, "X") == False
+
+    # Cas invalide : la case d'arrivée n'est pas occupée par un pion adverse
+    grille = initialiser_configuration_milieu()
+    grille[1][1] = "X"
+    grille[1][4] = " "
+    assert deplacement_elimination(grille, 1, 1, 1, 4, "X") == False
+
 
 ### Code principal  
 
 def main():
 
-    
     #Execution affichage sur les 3 grilles ainsi que test 
     print("Configuration de début :")
     afficher_grille(initialiser_configuration_debut())
@@ -208,30 +428,8 @@ def main():
     print("Le joueur 1 joue avec les pions X et le joueur 2 joue avec les pions O")
     for i in range(4): #On fait seulement 4 tours pour avoir un aperçu des mouvements
         afficher_grille(grille)
-
-        if tour == 1:
-            print("C'est au joueur 1 de jouer")
-            pion = "X"
-           
-        else:
-            print("C'est au joueur 2 de jouer")
-            pion = "O"
-        
-        l,c = saisir_coordonees_depart(grille) # l et c représente la ligne et la colonne
-        
-        #On vérifie que l'on choisit le bon pion
-        if grille[l][c] != pion:
-            print("Vous ne pouvez pas déplacer les pions de l'adversaire")
-            continue
-        
-        ligne,colonne = saisir_coordonnees_arrivee(grille)
-        
-        #Déplacement du pion
-        grille[l][c] = " "
-        grille[ligne][colonne] = pion
-
-        
-        tour = 3-tour
+        tour_de_jeu(grille, "X" if tour == 1 else "O")
+        tour = 3 - tour  # alterner joueur
 
         
 
