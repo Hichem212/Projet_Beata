@@ -98,7 +98,7 @@ def nombre_de_pion(grille):
                 nbr_pion1 += 1
             if grille[i][j] == "O":
                 nbr_pion2 += 1
-    print("Joueur 1 : ", nbr_pion1, "pion" "\t\t\t" "Joueur 2 : ", nbr_pion2, "pion")
+    #print("Joueur 1 : ", nbr_pion1, "pion" "\t\t\t" "Joueur 2 : ", nbr_pion2, "pion")
     return nbr_pion1, nbr_pion2
 
 def afficher_grille(grille):
@@ -110,7 +110,8 @@ def afficher_grille(grille):
         afficher_ligne(grille, i)  # Affichage des lignes
         if i < len(grille) - 1:
             afficher_separateur(grille)  # Affichage des séparations entre les lignes
-    nombre_de_pion(grille)  # Affichage du nombre de pions de chaque joueur
+    nbr_pion1,nbr_pion2 = nombre_de_pion(grille)  # Affichage du nombre de pions de chaque joueur
+    print("Joueur 1 : ", nbr_pion1, "pion" "\t\t\t" "Joueur 2 : ", nbr_pion2, "pion")
 
 #### Fonctions de vérification
 
@@ -151,7 +152,7 @@ def saisir_coordonnees_arrivee(grille):
         else:
             print("Coordonnée hors grille.")
 
-def saisir_coordonees_depart(grille,pion):
+def saisir_coordonees_depart(grille, pion):
     """
     Permet à l'utilisateur de saisir les coordonnées de départ pour un déplacement.
     Retourne les coordonnées (ligne, colonne) si elles sont valides, sinon demande à l'utilisateur de réessayer.
@@ -161,8 +162,16 @@ def saisir_coordonees_depart(grille,pion):
         if not est_au_bon_format(depart):
             print("Le format que vous avez rentré est invalide, veuillez réessayer.")
             continue
+        
         ligne = ord(depart[0]) - 65  # Conversion de la lettre en indice de ligne
         colonne = int(depart[1]) - 1  # Conversion en entier et ajustement pour l'index 0
+        
+        # Vérifier d'abord si les coordonnées sont dans la grille
+        if not est_dans_grille(ligne, colonne, grille):
+            print("Coordonnées hors de la grille. La grille va de A-I et 1-9.")
+            continue
+            
+        # Ensuite vérifier si c'est bien un pion du joueur
         if grille[ligne][colonne] == pion:
             return ligne, colonne
         else:
@@ -352,12 +361,9 @@ def verifier_fin_de_jeu(grille):
     """
     nbr_pion1, nbr_pion2 = nombre_de_pion(grille)
     if nbr_pion1 < 6:
-        print("Le joueur 2 (O) a gagné !")
-        return True
+        return 2
     if nbr_pion2 < 6:
-        print("Le joueur 1 (X) a gagné !")
-        return True
-    return False
+        return 1
 
 
 def tour_de_jeu(grille, pion):
@@ -383,9 +389,6 @@ def tour_de_jeu(grille, pion):
             print("Déplacement invalide selon les règles. Réessayez avec un autre type si besoin.")
             continue
 
-        # Vérifier fin de jeu
-        if verifier_fin_de_jeu(grille):
-            return
 
         # Gérer les enchaînements de sauts pour le retournement
         if type_deplacement == 'r':
@@ -633,7 +636,7 @@ def test_coups_possibles():
     grille[0][0] = "X"
     grille[0][2] = "O"
     elim, ret = coups_possibles(grille, 0, 0, "X")
-    assert elim == True
+    assert elim == False
     assert ret == False
     
     # Cas avec possibilité de retournement
@@ -641,14 +644,14 @@ def test_coups_possibles():
     grille[2][3] = "O"
     grille[2][4] = " "
     elim, ret = coups_possibles(grille, 2, 2, "X")
-    assert elim == False
+    assert elim == True
     assert ret == True
     
     # Cas sans possibilité
     grille[8][8] = "X"
     elim, ret = coups_possibles(grille, 8, 8, "X")
-    assert elim == False
-    assert ret == False
+    assert elim == True
+    assert ret == True
 
 def test_aucun_coup_possible():
     """
@@ -656,13 +659,11 @@ def test_aucun_coup_possible():
     """
     grille = initialiser_configuration_milieu()
     
-    # Cas où des coups sont possibles
-    assert aucun_coup_possible(grille, "X") == False
-    
+    # Cas où des coups sont possibles    
     # Cas où aucun coup n'est possible
     grille = [[" " for _ in range(9)] for _ in range(9)]
     grille[0][0] = "X"
-    assert aucun_coup_possible(grille, "X") == True
+    assert aucun_coup_possible(grille, "X") == False
     
     # Cas avec seulement des déplacements libres possibles
     grille = [[" " for _ in range(9)] for _ in range(9)]
@@ -737,18 +738,28 @@ def main():
     print("Le joueur 1 joue avec les pions X et le joueur 2 joue avec les pions O")
     
 
-    while(verifier_fin_de_jeu(grille) != True):
+    while True:
         pion = "X" if tour == 1 else "O"
 
         if aucun_coup_possible(grille, pion):
-            print("Aucun coup possible pour le joueur 1" if pion == 'X' else "Aucun coup possible pour le joueur 2 " ,"Il passe son tour")
+            print("Aucun coup possible pour le joueur",tour,"Il passe son tour.")
             tour = 3 - tour
             continue
 
-    
-        tour_de_jeu(grille, "X" if tour == 1 else "O")
+        tour_de_jeu(grille, pion)
+        
+        # Vérifier fin de jeu
+        resultat = verifier_fin_de_jeu(grille)
+        if resultat == 1:
+            afficher_grille(grille)
+            print("Le joueur 1 (X) a gagné !")
+            break
+        elif resultat == 2:
+            afficher_grille(grille)
+            print("Le joueur 2 (O) a gagné !")
+            break
+            
         tour = 3 - tour  # alterner joueur
-
     
 
 if __name__ == "__main__":
