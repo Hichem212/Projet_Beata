@@ -51,8 +51,8 @@ def initialiser_configuration_fin():
         [" ", " ", " ", " ", " ", " ", " ", " ", " "],
         [" ", " ", " ", " ", " ", " ", " ", "X", " "],
         [" ", " ", " ", " ", " ", " ", "X", " ", " "],
-        [" ", " ", " ", " ", " ", " ", " ", " ", " "],
-        [" ", "O", "O", " ", " ", " ", "O", "O", "O"]
+        [" ", " ", " ", " ", " ", " ", "O", " ", " "],
+        [" ", "O", "O", " ", " ", " ", " ", "O", "O"]
     ]
 
 #### Représentation graphique
@@ -135,10 +135,14 @@ def est_au_bon_format(message):
     return True
 
 def saisir_coordonnees_arrivee(grille):
+    """
+    Permet à l'utilisateur de saisir les coordonnées de d'arrivé  pour un déplacement.
+    Retourne les coordonnées (ligne, colonne) si elles sont valides, sinon demande à l'utilisateur de réessayer.
+    """
     while True:
-        entree = input("Entrez une coordonnée : ").upper()
+        entree = input("Entrez une coordonnée d'arrivée : ").upper()
         if not est_au_bon_format(entree):
-            print("Format invalide.")
+            print("Format invalide,veuillez réessayer ")
             continue
         ligne = ord(entree[0]) - 65
         colonne = int(entree[1]) - 1
@@ -240,35 +244,27 @@ def chemin_vide(grille, l1, c1, l2, c2):
     return True
 
 def deplacement_retournement(grille, ld, cd, la, ca, pion):
+    """  
+    Effectue un déplacement de retournement d'un pion adverse.
+    Le retournement est possible seulement si :
+    - La case d'arrivée est vide
+    - Il y a exactement un pion adverse entre départ et arrivée
+    - La distance est de 2 cases dans une direction (verticale, horizontale ou diagonale)
+    """
+
     direction = obtenir_direction(ld, cd, la, ca)
     if direction is None:
-        print(f"Direction invalide entre {ld},{cd} -> {la},{ca}")
         return False
-
+    if not ((abs(la - ld) == 2 and ca == cd) or (la == ld and abs(ca - cd) == 2) or (abs(la - ld) == 2 and abs(ca - cd) == 2)):
+        return False
     dl, dc = direction
-    l, c = ld + dl, cd + dc  # Case juste après le départ
-
-    print(f"Déplacement retournement : Départ ({ld},{cd}) -> Arrivée ({la},{ca})")
-    print(f"Direction calculée : ({dl},{dc})")
-    print(f"Case intermédiaire ({l},{c}) contient : {grille[l][c]}")
-    print(f"Case d'arrivée ({la},{ca}) contient : {grille[la][ca]}")
-
-    # Vérifie que la case suivante est un adversaire ET que la case d'arrivée est vide
-    if not est_case_adversaire(grille, l, c, pion):
-        print(f"Échec : La case intermédiaire ({l},{c}) n'est pas un adversaire.")
+    l, c = ld + dl, cd + dc
+    if not est_case_adversaire(grille, l, c, pion) or not est_case_vide(grille, la, ca):
         return False
-    if not est_case_vide(grille, la, ca):
-        print(f"Échec : La case d'arrivée ({la},{ca}) est occupée.")
-        return False
-
-    print("Retournement validé, mise à jour de la grille.")
-
-    # Retourne le pion adverse et déplace le pion actuel
-    grille[l][c] = pion  # Retournement du pion adverse
-    grille[ld][cd] = " "  # Case de départ vidée
-    grille[la][ca] = pion  # Pion déplacé à l'arrivée
+    grille[l][c] = pion
+    grille[ld][cd] = " "
+    grille[la][ca] = pion
     return True
-
 
 def coups_possibles(grille, l1, c1, pion):
     """
@@ -363,7 +359,11 @@ def verifier_fin_de_jeu(grille):
         return True
     return False
 
+
 def tour_de_jeu(grille, pion):
+    """
+    Applique la logique qui permet de jouer
+    """
     afficher_grille(grille)
     print("Tour du joueur 1->(X)" if pion == 'X' else "Tour du joueur 2->(O)")
 
@@ -417,7 +417,7 @@ def effectuer_deplacement(grille, type_deplacement, pion, ligne_depart, colonne_
     elif type_deplacement == 'l':
         return deplacement_libre(grille, ligne_depart, colonne_depart, ligne_arrivee, colonne_arrivee, pion)
     elif type_deplacement == 'r':
-        return deplacement_retournement(grille, ligne_depart, colonne_depart, ligne_arrivee, colonne_arrivee, pion)
+         return deplacement_retournement(grille,ligne_depart,colonne_depart,ligne_arrivee,colonne_arrivee,pion)
     return False
 
 def gerer_enchainement_sauts(grille, pion):
@@ -429,8 +429,8 @@ def gerer_enchainement_sauts(grille, pion):
         afficher_grille(grille)
         deplacement_reussi = False
         while not deplacement_reussi:
-            ligne_depart, colonne_depart = saisir_coordonees_depart(grille)
-            ligne_arrivee, colonne_arrivee = saisir_coordonnees_arrivee(grille, 'r', pion)
+            ligne_depart, colonne_depart = saisir_coordonees_depart(grille,pion)
+            ligne_arrivee, colonne_arrivee = saisir_coordonnees_arrivee(grille)
             deplacement_reussi = deplacement_retournement(grille, ligne_depart, colonne_depart, ligne_arrivee, colonne_arrivee, pion)
             if not deplacement_reussi:
                 print("Saut invalide. Veuillez réessayer.")
@@ -569,6 +569,130 @@ def test_deplacement_elimination():
     grille[1][4] = " "
     assert deplacement_elimination(grille, 1, 1, 1, 4, "X") == False
 
+def test_obtenir_direction():
+    """
+    Teste la fonction obtenir_direction avec plusieurs cas.
+    """
+    # Test des directions verticales
+    assert obtenir_direction(2, 3, 5, 3) == (1, 0)   # Vers le bas
+    assert obtenir_direction(5, 3, 2, 3) == (-1, 0)  # Vers le haut
+    
+    # Test des directions horizontales
+    assert obtenir_direction(3, 2, 3, 5) == (0, 1)   # Vers la droite
+    assert obtenir_direction(3, 5, 3, 2) == (0, -1)  # Vers la gauche
+    
+    # Test des directions diagonales
+    assert obtenir_direction(2, 2, 5, 5) == (1, 1)    # Diagonale bas-droite
+    assert obtenir_direction(5, 5, 2, 2) == (-1, -1)  # Diagonale haut-gauche
+    assert obtenir_direction(2, 5, 5, 2) == (1, -1)   # Diagonale bas-gauche
+    assert obtenir_direction(5, 2, 2, 5) == (-1, 1)  # Diagonale haut-droite
+    
+    # Test des cas non valides
+    assert obtenir_direction(1, 1, 2, 3) == None     # Pas aligné
+    assert obtenir_direction(0, 0, 0, 0) == None     # Même case
+
+def test_deplacement_retournement():
+    """
+    Teste la fonction deplacement_retournement avec plusieurs cas.
+    """
+    grille = initialiser_configuration_milieu()
+    
+    # Cas valide : retournement horizontal
+    grille[3][3] = "X"
+    grille[3][4] = "O"
+    grille[3][5] = " "
+    assert deplacement_retournement(grille, 3, 3, 3, 5, "X") == True
+    assert grille[3][4] == "X"  # Le pion adverse a été retourné
+    assert grille[3][3] == " "  # Case départ vide
+    assert grille[3][5] == "X"  # Case arrivée occupée
+    
+    # Cas valide : retournement vertical
+    grille[3][3] = "X"
+    grille[4][3] = "O"
+    grille[5][3] = " "
+    assert deplacement_retournement(grille, 3, 3, 5, 3, "X") == True
+    
+    # Cas invalide : distance incorrecte
+    grille[0][0] = "X"
+    grille[0][3] = "O"
+    assert deplacement_retournement(grille, 0, 0, 0, 3, "X") == False
+    
+    # Cas invalide : pas de pion adverse entre départ et arrivée
+    grille[1][1] = "X"
+    grille[1][2] = " "
+    grille[1][3] = " "
+    assert deplacement_retournement(grille, 1, 1, 1, 3, "X") == False
+
+def test_coups_possibles():
+    """
+    Teste la fonction coups_possibles avec plusieurs cas.
+    """
+    grille = initialiser_configuration_milieu()
+    
+    # Cas avec possibilité d'élimination
+    grille[0][0] = "X"
+    grille[0][2] = "O"
+    elim, ret = coups_possibles(grille, 0, 0, "X")
+    assert elim == True
+    assert ret == False
+    
+    # Cas avec possibilité de retournement
+    grille[2][2] = "X"
+    grille[2][3] = "O"
+    grille[2][4] = " "
+    elim, ret = coups_possibles(grille, 2, 2, "X")
+    assert elim == False
+    assert ret == True
+    
+    # Cas sans possibilité
+    grille[8][8] = "X"
+    elim, ret = coups_possibles(grille, 8, 8, "X")
+    assert elim == False
+    assert ret == False
+
+def test_aucun_coup_possible():
+    """
+    Teste la fonction aucun_coup_possible avec plusieurs cas.
+    """
+    grille = initialiser_configuration_milieu()
+    
+    # Cas où des coups sont possibles
+    assert aucun_coup_possible(grille, "X") == False
+    
+    # Cas où aucun coup n'est possible
+    grille = [[" " for _ in range(9)] for _ in range(9)]
+    grille[0][0] = "X"
+    assert aucun_coup_possible(grille, "X") == True
+    
+    # Cas avec seulement des déplacements libres possibles
+    grille = [[" " for _ in range(9)] for _ in range(9)]
+    grille[4][4] = "X"
+    assert aucun_coup_possible(grille, "X") == False
+
+def test_deplacement_libre():
+    """
+    Teste la fonction deplacement_libre avec plusieurs cas.
+    """
+    grille = initialiser_configuration_milieu()
+    
+    # Cas valide quand aucun autre coup possible
+    grille[8][8] = "X"
+    grille[7][7] = " "
+    assert deplacement_libre(grille, 8, 8, 7, 7, "X") == True
+    
+    # Cas invalide : autre coup possible
+    grille[0][0] = "X"
+    grille[0][1] = "O"
+    assert deplacement_libre(grille, 0, 0, 1, 0, "X") == False
+    
+    # Cas invalide : distance trop grande
+    grille[1][1] = "X"
+    assert deplacement_libre(grille, 1, 1, 3, 3, "X") == False
+    
+    # Cas invalide : case non vide
+    grille[2][2] = "X"
+    grille[2][3] = "O"
+    assert deplacement_libre(grille, 2, 2, 2, 3, "X") == False
 
 ### Code principal  
 
@@ -598,6 +722,10 @@ def main():
     test_direction_verticale()
     test_est_case_adversaire()
     test_est_case_vide()
+    test_aucun_coup_possible()
+    test_obtenir_direction()
+    test_coups_possibles()
+
 
 
     #Déplacement dans la grille(Les règles du jeu ne sont pas appliqué comme décrit dans l'atelier)
@@ -621,9 +749,7 @@ def main():
         tour_de_jeu(grille, "X" if tour == 1 else "O")
         tour = 3 - tour  # alterner joueur
 
-        
-
-
+    
 
 if __name__ == "__main__":
     main()
