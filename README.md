@@ -32,7 +32,7 @@ Les déplacements s'effectuent dans les **8 directions** : horizontalement, vert
    ```bash
    cd Projet_Beata
 
-3.Lancez le script principal : 
+3.Lancez le script final : 
   ```bash
-      python atelier2.py
+      python3 atelier4.py
    
