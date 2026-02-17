@@ -34,5 +34,6 @@ Les déplacements s'effectuent dans les **8 directions** : horizontalement, vert
 
 3.Lancez le script final : 
   ```bash
-  python3 atelier4.py
+   python3 atelier4.py
+
    
