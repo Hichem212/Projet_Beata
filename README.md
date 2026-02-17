@@ -28,11 +28,11 @@ Les déplacements s'effectuent dans les **8 directions** : horizontalement, vert
 1. Clonez le dépôt :
    ```bash
    git clone https://github.com/votre_pseudo/Projet_Beata.git
-2.Accédez au fichier : 
-   '''bash
-      cd Projet_Beata
+2. Accédez au dossier :
+   ```bash
+   cd Projet_Beata
 
 3.Lancez le script principal : 
-   '''bash
+  ```bash
       python atelier2.py
    
