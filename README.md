@@ -22,7 +22,7 @@ Les déplacements s'effectuent dans les **8 directions** : horizontalement, vert
 ## 🚀 Installation et Utilisation
 
 ### Prérequis
-* Python 3.x
+* Python 3
 
 ### Lancement du jeu
 1. Clonez le dépôt :
